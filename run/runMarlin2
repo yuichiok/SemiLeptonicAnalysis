@@ -1,0 +1,39 @@
+#!/bin/bash -x
+
+flist=$1
+start=$2
+end=$3
+inputxml=$4
+
+outputDir=./data_output
+rootfileDir=./rootfile
+logDir=./log
+
+tmpxmlDir=./tmpxml
+xmlDir=./myxml
+
+for count in $(seq $start $end)
+  do
+  input=`head -${count} ${flist} | tail -1`
+  echo ${input}
+  filename=`basename ${input}`
+  filename="${filename%.*}"
+  echo ${filename}
+  tmpxml=${tmpxmlDir}/${filename}.xml
+  rootxml=${tmpxmlDir}/${filename}.root.xml
+  lastxml=${xmlDir}/${filename}.xml
+  
+  log=${logDir}/${filename}.log    
+  output=${outputDir}/${filename}.slcio
+  rootfile=${rootfileDir}/${filename}.root
+
+  sed -e "/<!-- INPUT.slcio -->/i $input" $inputxml | sed -e "/<!-- OUTPUT.root -->/i $rootfile" > $lastxml
+
+  ${MARLIN}/bin/Marlin $lastxml > $log 2>&1
+  
+  echo "$count event finished"
+  
+done
+
+
+
